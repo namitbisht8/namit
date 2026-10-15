@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <defs>
+    <linearGradient id="appleBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#111827"/>
+      <stop offset="100%" stop-color="#0a0e1a"/>
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="shieldCore" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <!-- Background with iOS standard rounded square shape -->
+  <rect width="180" height="180" rx="40" fill="url(#appleBg)"/>
+  <rect width="176" height="176" x="2" y="2" rx="39" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2"/>
+  
+  <!-- Shield Icon -->
+  <g transform="translate(15, 12)">
+    <path d="M75 16 L130 36 C130 96 102 128 75 148 C48 128 20 96 20 36 Z" 
+          fill="url(#shieldCore)" 
+          stroke="url(#shieldGrad)" 
+          stroke-width="5" 
+          stroke-linejoin="round"/>
+          
+    <path d="M75 32 L116 48 C116 93 94 118 75 133 C56 118 34 93 34 48 Z" 
+          fill="none" 
+          stroke="#00E5FF" 
+          stroke-width="2.5" 
+          opacity="0.6"/>
+
+    <path d="M58 84 L70 96 L96 66" 
+          fill="none" 
+          stroke="#45dfa4" 
+          stroke-width="6" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="shieldInner" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1b2438"/>
+      <stop offset="100%" stop-color="#0c111d"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer Shield -->
+  <path d="M16 2 L28 6 C28 18 22 25 16 30 C10 25 4 18 4 6 Z" fill="url(#shieldInner)" stroke="url(#shieldGrad)" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Inner Detail Core -->
+  <path d="M16 6 L24 9 C24 18 19 23 16 26 C13 23 8 18 8 9 Z" fill="none" stroke="#00E5FF" stroke-width="1.2" opacity="0.6"/>
+  <!-- Check / Keymark Symbol -->
+  <path d="M12 16 L15 19 L21 12" fill="none" stroke="#45dfa4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

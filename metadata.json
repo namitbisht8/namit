@@ -1,0 +1,8 @@
+{
+  "name": "Remix Kavach - AI Security Gateway \u0026 Threat Interception",
+  "description": "Enterprise AI Security Gateway featuring real-time prompt injection detection, PII sanitization (Aadhaar, PAN, phone), RBAC policy enforcement, and zero-retention audit inspection.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
