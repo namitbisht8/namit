@@ -28,6 +28,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     sanitizedFilesCount,
     latestRedTeamRun,
     setArchitectureModalOpen,
+    currentUser,
+    auditMetrics,
+    documents,
   } = useApp();
 
   // Pipeline strip calm "message travelling" sequence (violet to teal)
@@ -191,10 +194,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <span>INTERCEPTION ENGINE 100% ONLINE</span>
             </div>
             <div className="px-3 py-1 rounded-full bg-[#1b1f2e] shadow-[2px_2px_4px_#11141F,-2px_-2px_4px_#262C42]">
-              LATENCY: <span className="text-[#a78bfa] font-bold">&lt; 15.2ms</span>
+              LATENCY: <span className="text-[#a78bfa] font-bold">&lt; {auditMetrics?.averageLatencyMs || 12.8}ms</span>
             </div>
             <div className="px-3 py-1 rounded-full bg-[#1b1f2e] shadow-[2px_2px_4px_#11141F,-2px_-2px_4px_#262C42]">
-              PROFILE: <span className="text-[#44e2cd] font-bold">OPERATOR</span>
+              ROLE: <span className="text-[#00E5FF] font-bold uppercase">{currentUser?.role || 'INTERN'}</span>
             </div>
             <div className="px-3 py-1 rounded-full bg-[#1b1f2e] shadow-[2px_2px_4px_#11141F,-2px_-2px_4px_#262C42] text-[#948e9d]">
               ZERO LOG RETENTION

@@ -5,9 +5,10 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/Header';
 import { DashboardView } from './components/DashboardView';
 import { ProtectedChatView } from './components/ProtectedChatView';
-import { RedTeamView } from './components/RedTeamView';
+import { AccessControlView } from './components/AccessControlView';
 import { DocumentsView } from './components/DocumentsView';
 import { AuditLogView } from './components/AuditLogView';
+import { TestingCenterView } from './components/TestingCenterView';
 import { StatesView } from './components/StatesView';
 import { SettingsView } from './components/SettingsView';
 import { Footer } from './components/Footer';
@@ -18,9 +19,11 @@ import { LoginModal } from './components/LoginModal';
 const pathToTab: Record<string, string> = {
   '/': 'dashboard',
   '/chat': 'protected-chat',
-  '/red-team': 'red-team',
+  '/access-control': 'access-control',
   '/documents': 'documents',
   '/audit': 'audit-log',
+  '/testing-center': 'testing-center',
+  '/red-team': 'testing-center',
   '/states': 'states',
   '/settings': 'settings',
 };
@@ -28,9 +31,11 @@ const pathToTab: Record<string, string> = {
 const tabToPath: Record<string, string> = {
   dashboard: '/',
   'protected-chat': '/chat',
-  'red-team': '/red-team',
+  'access-control': '/access-control',
   documents: '/documents',
   'audit-log': '/audit',
+  'testing-center': '/testing-center',
+  'red-team': '/testing-center',
   states: '/states',
   settings: '/settings',
 };
@@ -117,8 +122,11 @@ function MainContent() {
     const newEvt: InterceptedEvent = {
       id: 'evt-' + Date.now(),
       time: timeStr,
+      timestampUtc: new Date().toISOString(),
+      actorId: currentUser?.id || 'user-unknown',
+      actorName: currentUser?.name || 'Operator',
       source: 'Chat',
-      role: 'Operator',
+      role: activeRole,
       description: pick.desc,
       action: pick.action,
       vector: pick.vector,
@@ -130,6 +138,7 @@ function MainContent() {
       ruleId: pick.action === 'BLOCKED' ? 'INJ-HJK-01' : pick.action === 'MASKED' ? 'PII-AADHAAR' : 'POLICY-PASS',
       matchedRuleName: pick.action === 'BLOCKED' ? 'Adversarial Injection Attempt' : pick.action === 'MASKED' ? 'PII Checksum Redaction' : 'Standard Approved Flow',
       category: pick.action === 'BLOCKED' ? 'Prompt Injection' : pick.action === 'MASKED' ? 'PII Sanitization' : 'Safe Workflow',
+      securitySeverity: pick.action === 'BLOCKED' ? 'CRITICAL' : pick.action === 'MASKED' ? 'MEDIUM' : 'INFO',
       explanation: pick.action === 'BLOCKED'
         ? 'Flagged by heuristic injection gate. Prompt attempts to alter system alignment instructions.'
         : pick.action === 'MASKED'
@@ -145,6 +154,24 @@ function MainContent() {
     <div className="bg-[#1b1f2e] min-h-screen text-[#dfe1f6] flex flex-col justify-between selection:bg-[#a78bfa]/30 selection:text-white">
       {/* Navigation Header */}
       <Header />
+
+      {/* Auth notification toast */}
+      {authNotification && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 max-w-md w-full px-4 animate-fade-in pointer-events-auto">
+          <div className="flex items-center justify-between px-4 py-3 rounded-2xl bg-[#171b29]/95 backdrop-blur-md border border-[#00E5FF]/40 shadow-2xl text-[12px] font-mono-code text-[#dfe1f6]">
+            <div className="flex items-center gap-2.5">
+              <span className="material-symbols-outlined text-[18px] text-[#00E5FF]">verified_user</span>
+              <span>{authNotification}</span>
+            </div>
+            <button
+              onClick={dismissAuthNotification}
+              className="text-[#948e9d] hover:text-white p-1"
+            >
+              <span className="material-symbols-outlined text-[16px]">close</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Logged Out Status Banner */}
       {!currentUser && (
@@ -178,21 +205,15 @@ function MainContent() {
         )}
 
         {currentTab === 'protected-chat' && (
-          <ProtectedChatView
-            activeRole={activeRole}
-            onEventLogged={addEvent}
-          />
+          <ProtectedChatView />
         )}
 
-        {currentTab === 'red-team' && (
-          <RedTeamView
-            activeRole={activeRole}
-            onNavigateToChat={() => handleSelectTab('protected-chat')}
-          />
+        {currentTab === 'access-control' && (
+          <AccessControlView />
         )}
 
         {currentTab === 'documents' && (
-          <DocumentsView activeRole={activeRole} />
+          <DocumentsView />
         )}
 
         {currentTab === 'audit-log' && (
@@ -200,6 +221,10 @@ function MainContent() {
             events={events}
             onSelectEvent={setSelectedEventModal}
           />
+        )}
+
+        {(currentTab === 'testing-center' || currentTab === 'red-team') && (
+          <TestingCenterView />
         )}
 
         {currentTab === 'states' && <StatesView />}
@@ -219,103 +244,88 @@ function MainContent() {
         onClose={() => setArchitectureModalOpen(false)}
       />
 
-      {/* Zero-Trust Authentication Modal */}
+      {/* Login Authentication Modal */}
       <LoginModal />
 
-      {/* Auth Notification Toast */}
-      {authNotification && (
-        <div className="fixed bottom-6 right-6 z-50 animate-fade-in max-w-sm p-3.5 rounded-2xl bg-[#171b29] border border-[#a78bfa]/50 shadow-[8px_8px_20px_#0b0e17,-8px_-8px_20px_#272d43] flex items-center justify-between gap-3 text-[12px] font-mono-code text-[#dfe1f6]">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#45dfa4] text-[18px]">verified_user</span>
-            <span>{authNotification}</span>
-          </div>
-          <button
-            onClick={dismissAuthNotification}
-            className="p-1 rounded-lg text-[#948e9d] hover:text-[#dfe1f6]"
-            aria-label="Dismiss notification"
-          >
-            <span className="material-symbols-outlined text-[16px]">close</span>
-          </button>
-        </div>
-      )}
-
-      {/* Event Details Quick Modal */}
+      {/* Event Details Drawer */}
       {selectedEventModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="max-w-lg w-full p-6 rounded-[22px] bg-[#1b1f2e] shadow-[12px_12px_24px_#090d1c,-12px_-12px_24px_#283049] border border-[#2a3044] space-y-4 font-mono-code text-[12px]">
-            <div className="flex items-center justify-between pb-3 border-b border-[#252a3b]">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#a78bfa]">shield</span>
-                <h3 className="font-headline text-[17px] font-bold text-[#dfe1f6]">
-                  Intercepted Event Details
-                </h3>
-              </div>
-              <button
-                onClick={() => setSelectedEventModal(null)}
-                className="p-1 rounded-lg text-[#cac4d4] hover:text-[#dfe1f6]"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            </div>
-
-            <div className="space-y-2 text-[#cac4d4]">
-              <div className="flex justify-between p-2.5 rounded-lg bg-[#171b29]">
-                <span className="text-[#948e9d]">Event ID:</span>
-                <span className="text-[#dfe1f6]">{selectedEventModal.id}</span>
-              </div>
-              <div className="flex justify-between p-2.5 rounded-lg bg-[#171b29]">
-                <span className="text-[#948e9d]">Timestamp:</span>
-                <span className="text-[#dfe1f6]">{selectedEventModal.time}</span>
-              </div>
-              <div className="flex justify-between p-2.5 rounded-lg bg-[#171b29]">
-                <span className="text-[#948e9d]">User Role:</span>
-                <span className="text-[#a78bfa] font-bold">Operator (Single Profile)</span>
-              </div>
-              <div className="flex justify-between p-2.5 rounded-lg bg-[#171b29]">
-                <span className="text-[#948e9d]">Action Taken:</span>
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in"
+          onClick={() => setSelectedEventModal(null)}
+        >
+          <div 
+            className="max-w-xl w-full p-6 sm:p-7 rounded-[26px] bg-[#1b1f2e] border border-[#2a3044] shadow-2xl relative space-y-4 max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-[#2a3044] pb-3">
+              <div className="flex items-center gap-2.5">
                 <span
-                  className={`font-bold ${
+                  className={`w-3 h-3 rounded-full ${
                     selectedEventModal.action === 'BLOCKED'
-                      ? 'text-[#fb7185]'
+                      ? 'bg-[#fb7185]'
                       : selectedEventModal.action === 'MASKED'
-                      ? 'text-[#fbbf24]'
-                      : 'text-[#45dfa4]'
+                      ? 'bg-[#fbbf24]'
+                      : 'bg-[#45dfa4]'
                   }`}
-                >
-                  {selectedEventModal.action}
-                </span>
-              </div>
-              <div className="flex justify-between p-2.5 rounded-lg bg-[#171b29]">
-                <span className="text-[#948e9d]">Overhead Latency:</span>
-                <span className="text-[#45dfa4]">{selectedEventModal.latencyMs} ms</span>
-              </div>
-              <div className="flex justify-between p-2.5 rounded-lg bg-[#171b29]">
-                <span className="text-[#948e9d]">Risk Score:</span>
-                <span className="text-[#fbbf24]">{selectedEventModal.riskScore ?? 45}/100</span>
-              </div>
-
-              <div className="p-3 rounded-xl bg-[#151824] space-y-1">
-                <div className="text-[10px] text-[#948e9d]">PAYLOAD SUMMARY:</div>
-                <div className="text-[#dfe1f6] text-[12px] break-words">
-                  {selectedEventModal.rawPayload || selectedEventModal.description}
+                ></span>
+                <div>
+                  <h3 className="font-headline text-[16px] font-bold text-[#dfe1f6]">
+                    {selectedEventModal.matchedRuleName || selectedEventModal.description}
+                  </h3>
+                  <div className="text-[10px] font-mono-code text-[#948e9d]">
+                    ID: {selectedEventModal.id} • {selectedEventModal.time} • Source: {selectedEventModal.source}
+                  </div>
                 </div>
               </div>
-
-              <div className="p-3 rounded-xl bg-[#151824] space-y-1">
-                <div className="text-[10px] text-[#948e9d]">SHA-256 DIGEST:</div>
-                <div className="text-[#44e2cd] text-[11px] break-all">
-                  {selectedEventModal.sha256 || '7e2d9b8911c4f4019a'}
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-2 flex justify-end">
               <button
                 onClick={() => setSelectedEventModal(null)}
-                className="px-4 py-2 rounded-xl bg-[#1b1f2e] text-[#a78bfa] shadow-[2px_2px_4px_#11141F,-2px_-2px_4px_#262C42] font-mono-code text-[12px]"
+                className="text-[#948e9d] hover:text-white"
               >
-                Dismiss
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
+            </div>
+
+            <div className="space-y-3 text-[12px] font-mono-code">
+              <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[#171b29] border border-[#2a3044]">
+                <div>
+                  <span className="text-[#948e9d] text-[10px] uppercase">Action:</span>
+                  <div className="font-bold text-[#dfe1f6]">{selectedEventModal.action}</div>
+                </div>
+                <div>
+                  <span className="text-[#948e9d] text-[10px] uppercase">Risk Score:</span>
+                  <div className="font-bold text-[#fbbf24]">{selectedEventModal.riskScore} / 100</div>
+                </div>
+                <div>
+                  <span className="text-[#948e9d] text-[10px] uppercase">Actor:</span>
+                  <div className="text-[#dfe1f6]">{selectedEventModal.actorName || 'Operator'} ({selectedEventModal.role})</div>
+                </div>
+                <div>
+                  <span className="text-[#948e9d] text-[10px] uppercase">Latency:</span>
+                  <div className="text-[#45dfa4]">{selectedEventModal.latencyMs} ms</div>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[#948e9d] text-[10px] uppercase block mb-1">Explanation & Technical Analysis:</span>
+                <div className="p-3 rounded-xl bg-[#151824] border border-[#2a3044] text-[#cac4d4]">
+                  {selectedEventModal.explanation || selectedEventModal.description}
+                </div>
+              </div>
+
+              {selectedEventModal.denialReason && (
+                <div>
+                  <span className="text-[#fb7185] text-[10px] uppercase block mb-1">Reason for Denial:</span>
+                  <div className="p-2.5 rounded-xl bg-[#fb7185]/10 border border-[#fb7185]/30 text-[#fb7185]">
+                    {selectedEventModal.denialReason}
+                  </div>
+                </div>
+              )}
+
+              {selectedEventModal.sha256 && (
+                <div className="text-[10px] text-[#948e9d] pt-2 border-t border-[#2a3044]">
+                  SHA-256 Audit Signature: <span className="text-[#a78bfa] font-mono">{selectedEventModal.sha256}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -326,10 +336,10 @@ function MainContent() {
 
 export default function App() {
   return (
-    <AppProvider>
-      <MotionProvider>
+    <MotionProvider>
+      <AppProvider>
         <MainContent />
-      </MotionProvider>
-    </AppProvider>
+      </AppProvider>
+    </MotionProvider>
   );
 }

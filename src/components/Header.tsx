@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useMotion } from '../motion/motionSystem';
-import { useApp } from '../context/AppContext';
+import { useApp, SYSTEM_DEMO_USERS } from '../context/AppContext';
 import { AnimatedBackground } from './motion-primitives/animated-background';
 import { MotionControlBadge } from './motion/MotionControlBadge';
 
@@ -16,6 +16,7 @@ export const Header: React.FC = () => {
     startGuidedDemo,
     setArchitectureModalOpen,
     currentUser,
+    switchUserPersona,
     logout,
     setLoginModalOpen,
   } = useApp();
@@ -23,10 +24,10 @@ export const Header: React.FC = () => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'protected-chat', label: 'Protected Chat' },
-    { id: 'red-team', label: 'Red Team' },
+    { id: 'access-control', label: 'Access Control' },
     { id: 'documents', label: 'Documents' },
     { id: 'audit-log', label: 'Audit Log' },
-    { id: 'states', label: 'States' },
+    { id: 'testing-center', label: 'Testing Center' },
     { id: 'settings', label: 'Settings' },
   ];
 
@@ -96,7 +97,7 @@ export const Header: React.FC = () => {
                 type="button"
                 className={`px-3 py-1.5 rounded-xl text-[13px] font-medium transition-colors ${
                   currentTab === item.id
-                    ? 'text-[#a78bfa]'
+                    ? 'text-[#a78bfa] font-bold'
                     : 'text-[#cac4d4] hover:text-[#dfe1f6]'
                 }`}
               >
@@ -125,7 +126,7 @@ export const Header: React.FC = () => {
                 type="button"
                 className={`px-2.5 py-1.5 rounded-xl text-[12px] font-medium transition-colors ${
                   currentTab === item.id
-                    ? 'text-[#a78bfa]'
+                    ? 'text-[#a78bfa] font-bold'
                     : 'text-[#cac4d4] hover:text-[#dfe1f6]'
                 }`}
               >
@@ -135,9 +136,8 @@ export const Header: React.FC = () => {
           </AnimatedBackground>
         </nav>
 
-        {/* Right Controls: Guided Demo, Architecture, Profile/Login, Motion */}
+        {/* Right Controls */}
         <div className="flex items-center gap-2 sm:gap-2.5">
-          
           {/* Guided Demo Button */}
           <button
             onClick={startGuidedDemo}
@@ -146,7 +146,7 @@ export const Header: React.FC = () => {
             title="Start Interactive 6-Step Tour"
           >
             <span className="material-symbols-outlined text-[15px]">tour</span>
-            <span>Guided Demo</span>
+            <span>Tour</span>
           </button>
 
           {/* Architecture Modal Trigger */}
@@ -157,7 +157,7 @@ export const Header: React.FC = () => {
             title="View Kavach Bi-Directional Flow Diagram"
           >
             <span className="material-symbols-outlined text-[15px]">account_tree</span>
-            <span>Architecture</span>
+            <span>Arch</span>
           </button>
 
           {/* Login / User Profile Dropdown */}
@@ -178,8 +178,8 @@ export const Header: React.FC = () => {
                   <span className="font-mono-code text-[11px] text-[#dfe1f6] font-semibold leading-tight max-w-[100px] truncate">
                     {currentUser.name.split(' ')[0]}
                   </span>
-                  <span className="font-mono-code text-[9px] text-[#45dfa4] leading-tight">
-                    Operator
+                  <span className="font-mono-code text-[9px] text-[#00E5FF] leading-tight font-bold uppercase">
+                    {currentUser.role}
                   </span>
                 </div>
                 <span className="material-symbols-outlined text-[15px] text-[#948e9d]">
@@ -187,9 +187,9 @@ export const Header: React.FC = () => {
                 </span>
               </button>
 
-              {/* Profile Dropdown Menu */}
+              {/* Profile Dropdown Menu with 1-Click Role Switcher */}
               {userMenuOpen && (
-                <div className="absolute right-0 mt-2 w-72 p-3.5 rounded-2xl bg-[#1b1f2e] shadow-[12px_12px_28px_#0b0e17,-12px_-12px_28px_#272d43] border border-[#2a3044] z-50 space-y-3 animate-fade-in">
+                <div className="absolute right-0 mt-2 w-80 p-4 rounded-2xl bg-[#1b1f2e] shadow-[12px_12px_28px_#0b0e17,-12px_-12px_28px_#272d43] border border-[#2a3044] z-50 space-y-3 animate-fade-in">
                   {/* User Info Header */}
                   <div className="flex items-start gap-2.5 pb-2.5 border-b border-[#252a3b]">
                     <div className="w-9 h-9 rounded-full bg-[#171b29] border border-[#a78bfa]/60 flex items-center justify-center font-headline text-[12px] font-bold text-[#a78bfa] shrink-0 shadow-[inset_1px_1px_3px_#11141F]">
@@ -203,46 +203,57 @@ export const Header: React.FC = () => {
                         {currentUser.email}
                       </div>
                       <div className="mt-1 flex items-center gap-1.5">
-                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#45dfa4]/10 text-[#45dfa4] font-mono-code font-semibold border border-[#45dfa4]/20">
-                          Single Operator Role
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#00E5FF]/20 text-[#00E5FF] font-mono-code font-bold uppercase border border-[#00E5FF]/30">
+                          Role: {currentUser.role}
+                        </span>
+                        <span className="text-[9px] text-[#948e9d] font-mono-code">
+                          ({currentUser.department})
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Session Status Details */}
-                  <div className="p-2.5 rounded-xl bg-[#171b29] space-y-1.5 text-[10px] font-mono-code text-[#948e9d]">
-                    <div className="flex justify-between items-center">
-                      <span>Gateway Session:</span>
-                      <span className="text-[#45dfa4] font-semibold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#45dfa4] animate-ping"></span>
-                        Active Enclave
-                      </span>
+                  {/* 1-Click Persona Switcher for Quick RBAC Verification */}
+                  <div className="space-y-1.5">
+                    <div className="text-[10px] font-mono-code uppercase tracking-wider text-[#948e9d]">
+                      Switch Persona (Live RBAC Test):
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span>Token Expiry:</span>
-                      <span className="text-[#dfe1f6]">{currentUser.tokenExpiry}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Last Verified:</span>
-                      <span className="text-[#dfe1f6]">{currentUser.lastLogin}</span>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {SYSTEM_DEMO_USERS.map((u) => (
+                        <button
+                          key={u.id}
+                          type="button"
+                          onClick={() => {
+                            switchUserPersona(u);
+                            setUserMenuOpen(false);
+                          }}
+                          className={`px-2.5 py-1.5 rounded-xl text-[11px] font-mono-code text-left transition-all ${
+                            currentUser.id === u.id
+                              ? 'bg-[#00E5FF] text-[#11141F] font-bold shadow'
+                              : 'bg-[#171b29] text-[#cac4d4] hover:text-[#dfe1f6] border border-[#2a3044]'
+                          }`}
+                        >
+                          <div className="font-bold">{u.name.split(' ')[0]}</div>
+                          <div className="text-[9px] uppercase opacity-75">{u.role}</div>
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Actions: Switch persona or Log Out */}
-                  <div className="space-y-1.5 pt-1">
+                  {/* Actions */}
+                  <div className="space-y-1 pt-2 border-t border-[#252a3b]">
                     <button
                       type="button"
                       onClick={() => {
                         setUserMenuOpen(false);
-                        setLoginModalOpen(true);
+                        setTab('access-control');
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-medium text-[#cac4d4] hover:text-[#dfe1f6] hover:bg-[#1f2438] transition-all"
+                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-medium text-[#cac4d4] hover:text-[#dfe1f6] hover:bg-[#1f2438] transition-all"
                     >
-                      <span className="material-symbols-outlined text-[16px] text-[#44e2cd]">
-                        switch_account
+                      <span className="material-symbols-outlined text-[16px] text-[#a78bfa]">
+                        shield_person
                       </span>
-                      <span>Switch Operator Persona</span>
+                      <span>Access Control Matrix</span>
                     </button>
 
                     <button
@@ -251,37 +262,34 @@ export const Header: React.FC = () => {
                         setUserMenuOpen(false);
                         logout();
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] font-medium text-[#fb7185] hover:bg-[#fb7185]/10 border border-transparent hover:border-[#fb7185]/20 transition-all"
+                      className="w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-[12px] font-medium text-[#fb7185] hover:bg-[#fb7185]/10 border border-transparent hover:border-[#fb7185]/20 transition-all"
                     >
-                      <span className="material-symbols-outlined text-[16px]">
-                        logout
-                      </span>
-                      <span>Log Out of Kavach</span>
+                      <span className="material-symbols-outlined text-[16px]">logout</span>
+                      <span>Log Out</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
           ) : (
-            /* Logged Out: Show clear Log In Button */
             <button
-              type="button"
               onClick={() => setLoginModalOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#a78bfa] to-[#44e2cd] text-[#11141F] font-headline font-bold text-[12px] shadow-[2px_2px_6px_#11141F,-2px_-2px_6px_#262C42] hover:opacity-95 active:scale-95 transition-all"
+              type="button"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#a78bfa] to-[#00E5FF] text-[#11141F] font-bold text-[11px] font-headline shadow-md hover:opacity-95 transition-all"
             >
-              <span className="material-symbols-outlined text-[16px]">login</span>
-              <span>Log In</span>
+              <span className="material-symbols-outlined text-[15px]">login</span>
+              <span>Sign In</span>
             </button>
           )}
 
-          {/* Motion Badge */}
+          {/* Motion Control Badge */}
           <MotionControlBadge />
 
-          {/* Mobile Menu Trigger */}
+          {/* Mobile Menu Toggle */}
           <button
-            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="xl:hidden p-2 rounded-xl text-[#cac4d4] hover:text-[#dfe1f6] bg-[#1b1f2e] shadow-[2px_2px_4px_#11141F,-2px_-2px_4px_#262C42]"
+            type="button"
+            className="md:hidden p-2 rounded-xl text-[#cac4d4] hover:text-[#dfe1f6] hover:bg-[#171b29] transition-all"
             aria-label="Toggle navigation menu"
           >
             <span className="material-symbols-outlined text-[20px]">
@@ -293,79 +301,23 @@ export const Header: React.FC = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="xl:hidden pointer-events-auto max-w-[1280px] mx-auto mt-2 p-4 bg-[#1b1f2e] rounded-[20px] shadow-[8px_8px_16px_#11141F,-8px_-8px_16px_#262C42] border border-[#2a3044]/40 flex flex-col gap-3">
-          <div className="flex items-center justify-between pb-2 border-b border-[#252a3b]">
-            {currentUser ? (
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-[#171b29] border border-[#a78bfa]/50 flex items-center justify-center font-headline text-[10px] font-bold text-[#a78bfa]">
-                  {currentUser.initials}
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-mono-code text-[11px] text-[#dfe1f6] font-semibold">
-                    {currentUser.name}
-                  </span>
-                  <span className="font-mono-code text-[9px] text-[#45dfa4]">
-                    Single Operator
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <span className="font-mono-code text-[11px] text-[#948e9d]">
-                Guest / Demo Mode
-              </span>
-            )}
-
-            <div className="flex items-center gap-2">
-              {currentUser ? (
-                <button
-                  onClick={() => {
-                    logout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-[#fb7185]/10 text-[#fb7185] text-[11px] font-mono-code font-semibold border border-[#fb7185]/20"
-                >
-                  Log Out
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    setLoginModalOpen(true);
-                    setMobileMenuOpen(false);
-                  }}
-                  className="px-3 py-1 rounded-lg bg-[#a78bfa] text-[#11141F] text-[11px] font-headline font-bold"
-                >
-                  Log In
-                </button>
-              )}
-              <button
-                onClick={() => {
-                  startGuidedDemo();
-                  setMobileMenuOpen(false);
-                }}
-                className="text-[11px] font-mono-code text-[#44e2cd] ml-1"
-              >
-                Tour
-              </button>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setTab(item.id);
-                  setMobileMenuOpen(false);
-                }}
-                className={`p-2.5 rounded-xl text-left text-[13px] font-medium transition-all ${
-                  currentTab === item.id
-                    ? 'bg-[#171b29] text-[#a78bfa] shadow-[inset_2px_2px_4px_#11141F,inset_-2px_-2px_4px_#262C42]'
-                    : 'text-[#cac4d4] hover:text-[#dfe1f6]'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+        <div className="md:hidden pointer-events-auto max-w-[1280px] mx-auto mt-2 p-4 rounded-2xl bg-[#1b1f2e] border border-[#2a3044] shadow-2xl space-y-2 animate-fade-in">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => {
+                setTab(item.id);
+                setMobileMenuOpen(false);
+              }}
+              className={`w-full px-3 py-2 rounded-xl text-left text-[13px] font-medium font-mono-code transition-all ${
+                currentTab === item.id
+                  ? 'bg-[#a78bfa] text-[#11141F] font-bold'
+                  : 'text-[#cac4d4] hover:bg-[#171b29]'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
         </div>
       )}
     </header>
